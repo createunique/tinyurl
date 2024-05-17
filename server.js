@@ -1,3 +1,4 @@
+
 const express = require('express');
 const crypto = require('crypto');
 const mysql = require('mysql');
@@ -6,14 +7,17 @@ const app = express();
 app.use(express.json());
 
 const db = mysql.createConnection({
-  host: 'HOSTNAME',
-  user: 'DBUSERNAME',
-  password: 'DBPASSWORD',
-  database: 'DBNAME',
-});
+    host: 'sql200.infinityfree.com',
+    user: 'if0_36329016',
+    password: 'W61DxPiDLMGDqN3',
+    database: 'if0_36329016_url_short_t',
+  });
 
 db.connect((err) => {
-  if (err) throw err;
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    process.exit(1); // Exit the process with failure code
+  }
   console.log('Connected to database');
 });
 
@@ -23,9 +27,17 @@ app.post('/shorten', (req, res) => {
 
   const query = 'INSERT INTO urls (long_url, short_code) VALUES (?, ?)';
   db.query(query, [url, shortCode], (err, result) => {
-    if (err) throw err;
-    res.send(`http://tinyurl.rf.gd/${shortCode}`);
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).send('Server error');
+    }
+    res.send(`https://tinyurl.vercel.app/${shortCode}`);
   });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 app.listen(3000, () => {
